@@ -1,13 +1,21 @@
-name: Push and Pull Request Trigger
+name: Push, Pull Request, and Manual Trigger
 
-# Trigger workflow on push or pull request to any branch
+# Trigger workflow on push, pull request, or manual trigger
 on:
   push:
-    branches: # Specify branches if needed, or leave blank for all branches
+    branches:
       - main
+      - develop
   pull_request:
-    branches: # Specify branches if needed, or leave blank for all branches
+    branches:
       - main
+      - develop
+  workflow_dispatch: # Enables manual triggering of the workflow
+    inputs:
+      environment:
+        description: 'Environment to run tests on'
+        required: false
+        default: 'staging'
 
 jobs:
   example-job:
@@ -29,7 +37,36 @@ jobs:
         if: github.event_name == 'pull_request'
         run: echo "This workflow was triggered by a PULL REQUEST event."
 
-      # Step 4: Run a Python script (optional)
+      # Step 4: Print a message when triggered manually
+      - name: Manual Trigger Detected
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "This workflow was triggered MANUALLY."
+          echo "Selected environment: ${{ github.event.inputs.environment }}"
+
+      # Step 5: Run a Python script (optional)
       - name: Run Python Script
         run: |
           python -c "print('Hello from Python!')"
+
+  test-manual:
+    # This job will only run when triggered manually
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' # Only run this job for manual triggers
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Install dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 3: Run unit tests
+      - name: Run Tests
+        run: |
+          pip install pytest
+          pytest
