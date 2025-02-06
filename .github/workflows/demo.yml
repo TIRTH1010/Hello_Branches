@@ -1,0 +1,35 @@
+name: Push and Pull Request Trigger
+
+# Trigger workflow on push or pull request to any branch
+on:
+  push:
+    branches: # Specify branches if needed, or leave blank for all branches
+      - main
+  pull_request:
+    branches: # Specify branches if needed, or leave blank for all branches
+      - main
+
+jobs:
+  example-job:
+    # Run this job on the latest Ubuntu environment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Print a message when triggered by push
+      - name: Push Event Detected
+        if: github.event_name == 'push'
+        run: echo "This workflow was triggered by a PUSH event."
+
+      # Step 3: Print a message when triggered by pull request
+      - name: Pull Request Event Detected
+        if: github.event_name == 'pull_request'
+        run: echo "This workflow was triggered by a PULL REQUEST event."
+
+      # Step 4: Run a Python script (optional)
+      - name: Run Python Script
+        run: |
+          python -c "print('Hello from Python!')"
